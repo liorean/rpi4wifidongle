@@ -12,7 +12,7 @@ From another linux installation:
 # xzcat -c «distroimage» | pv | tee «targetdevice» > /dev/null
 ```
 or as a sudo capable user:
-```bash
+```
 $ xzcat -c «distroimage» | pv | sudo tee «targetdevice» > /dev/null
 ```
 Note: `| pv` is just for viewing progress of writing the image, and might not even be installed on the system of origin, so you can remove that part if you don't want it.
@@ -72,25 +72,27 @@ You should now have internet through WiFi, which means it is time to upgrade and
 # apt -o Acquire::Check-Valid-Until=false -o Acquire::Check-Date=false install console-setup
 # apt -o Acquire::Check-Valid-Until=false -o Acquire::Check-Date=false install ntp
 ```
-From here on, you should not have to use the `-o Acquire::Check-Valid-Until=false -o Acquire::Check-Date=false` flags.
+Here, use [Debian:Keyboard](https://wiki.debian.org/Keyboard) for reference on how to setup your keyboard, [Debian:Locale](https://wiki.debian.org/Locale) for your language, and [Debian:DateTime](https://wiki.debian.org/DateTime) for reference on how to set up your time, date and timezone settings.
+From here on, you should not have to use the `-o Acquire::Check-Valid-Until=false -o Acquire::Check-Date=false` flags to `apt` any longer..
 ### Starting WPA Supplicant per default
 You need to create two files. First `/opt/wpa-supplicant.sh`.
 ```bash
-#!/bin/sh
+#!/bin/bash
 /sbin/wpa_supplicant -B -i wlan0 -c /etc/wpa_supplicant/wpa-suppplicant.conf
 ```
 And set its rights:
 ```
 # chmod +x /opt/wpa-supplicant.sh
 ```
-Then create `/usr/lib/systemd/wpa.service` with the following content:
+Then create `/usr/lib/systemd/system/wpa.service` with the following content:
 ```
 [Unit]
-Description=WPA Supplicant initialisation
+Description=WPA Supplicant Initialisation
+After=wpa_supplicant.service
 
 [Service]
 Type=idle
-ExecStart=/opt/wpa-supplicant.sh
+ExecStart=/usr/bin/bash /opt/wpa-supplicant.sh
 
 [Install]
 WantedBy=multi-user.target
@@ -100,29 +102,52 @@ And finally start it on boot:
 # systemctl enable wpa.service
 ```
 That should mean your WPA Supplicant now starts per default. Reboot to check.
-### Setting upp DHCP
-```bash
-# apt -o Acquire::Check-Valid-Until=false -o Acquire::Check-Date=false dnsmasq
+### Setting upp a network bridge
+Debian has a nice page about this at [Debian:Bridge Network Connections](https://wiki.debian.org/BridgeNetworkConnections). 
+```
+# apt install bridge-utils
+# brctl addbr br0
+# brctl addif br0 eth0 wlan0
+```
+And as per the Debian page, setting up the DHCP
 
+
+
+
+### Setting up DHCP
+```
+# apt install dnsmasq
 ```
 
 
 
 
 
-```bash
-#!/bin/sh
-/sbin/wpa_supplicant -B -i wlan0 -c /etc/wpa_supplicant/wpa-suppplicant.conf
-```
+Debian
+https://wiki.debian.org/RaspberryPi4
 
 
 
+https://linuxhint.com/debian_etc_network_interfaces/
 
+Bridge
+https://pimylifeup.com/raspberry-pi-wifi-bridge/
+https://stackoverflow.com/questions/19815844/dnsmasq-on-an-interface-connected-to-a-linux-bridge-not-working
+https://wiki.debian.org/BridgeNetworkConnectionsProxyArp
+https://wiki.debian.org/BridgeNetworkConnections
+https://raspberrypi.stackexchange.com/questions/34968/bridge-eth0-and-eth1-and-run-dnsmasq
+https://www.elementzonline.com/blog/sharing-or-bridging-internet-to-ethernet-from-wifi-raspberry-pI
+https://www.instructables.com/Raspberry-Pi-Ethernet-to-Wifi-Bridge/
+https://willhaley.com/blog/raspberry-pi-wifi-ethernet-bridge/
+https://superuser.com/questions/1540424/what-are-the-real-world-differences-between-bind-systemd-resolved-dnsmasq-etc
 
-20211124_raspi_4_bookworm.img.xz
-
-
-
-
-
-
+WiFi
+https://www.miun.se/medarbetare/gemensamt/servicetjanster/it/natverk/
+https://manpages.debian.org/stretch/wpasupplicant/wpa_supplicant.conf.5.en.html
+https://unix.stackexchange.com/questions/367277/configure-wireless-interface-for-multiple-locations
+https://linuxconfig.org/etcnetworkinterfacesto-connect-ubuntu-to-a-wireless-network
+https://askubuntu.com/questions/497540/where-is-my-wpa-supplicant-conf
+https://raspberrypi.stackexchange.com/questions/85599/how-to-start-stop-wpa-supplicant-on-default-raspbian
+https://unix.stackexchange.com/questions/182847/how-to-automatically-apply-wpa-supplicant-configuration
+https://www.linuxquestions.org/questions/linux-wireless-networking-41/wlanconnection-wpa2-eap-peap%3Bmschapv2-how-to-configure-633456/
+https://www.linuxbabe.com/command-line/ubuntu-server-16-04-wifi-wpa-supplicant
