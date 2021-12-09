@@ -151,3 +151,5 @@ https://raspberrypi.stackexchange.com/questions/85599/how-to-start-stop-wpa-supp
 https://unix.stackexchange.com/questions/182847/how-to-automatically-apply-wpa-supplicant-configuration
 https://www.linuxquestions.org/questions/linux-wireless-networking-41/wlanconnection-wpa2-eap-peap%3Bmschapv2-how-to-configure-633456/
 https://www.linuxbabe.com/command-line/ubuntu-server-16-04-wifi-wpa-supplicant
+https://serverfault.com/questions/152363/bridging-wlan0-to-eth0?rq=1
+https://www.cyberciti.biz/faq/how-to-configuring-bridging-in-debian-linux/
